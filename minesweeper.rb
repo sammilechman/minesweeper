@@ -66,18 +66,20 @@ class Board
 end
 
 class Tile
-  attr_reader :position
+  attr_reader :position, :bomb, :neighbors, :adj_bombs
 
   def initialize(position, bomb = false)
     @position = position
     @bomb = bomb
+    @neighbors = neighbors_locations
+    @adj_bombs = neighbor_bomb_count
   end
 
   def reveal
 
   end
 
-  def neighbors
+  def neighbors_locations
     deltas = [[-1, 1], [0, 1], [1, 1], [-1, 0], [-1, -1], [1, -1], [1, 0], [0, -1]]
     neighbors = deltas.map do |dx, dy|
       [position[0] + dx, position[1] + dy]
@@ -92,7 +94,11 @@ class Tile
   end
 
   def neighbor_bomb_count
-
+    count = 0
+    @neighbors.each do |neighbor|
+      count += 1 if neighbor.bomb == true
+    end
+    count
   end
 
   def print_tile
@@ -105,6 +111,6 @@ class Tile
 
 end
 
-a = Tile.new([0,0])
+a = Tile.new([1,1])
 b = Board.new
-p b.board
+p a.adj_bombs
