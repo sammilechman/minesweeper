@@ -31,14 +31,46 @@ def load
 
 
 class Board
+  attr_accessor :board
+
+  def initialize
+    @board = create_new_board
+  end
+
+  def create_new_board
+    board = Array.new(9) { Array.new(9) }
+
+    bomb_positions = seed_bombs
+
+    bomb_positions.each do |position|
+      board[ position[0] ][ position[1] ] = Tile.new(position, true)
+    end
+
+    board.each_with_index do |row, idx|
+      row.each_with_index do |tile, idx2|
+        board[idx][idx2] = Tile.new([idx, idx2]) if tile.nil?
+      end
+    end
+  end
+
+  def seed_bombs
+    list = []
+    until list.length == 10
+      location = [rand(9), rand(9)]
+      list << location unless list.include?(location)
+    end
+    list
+  end
+
 
 end
 
 class Tile
   attr_reader :position
-  def initialize(position)
-    @position = position
 
+  def initialize(position, bomb = false)
+    @position = position
+    @bomb = bomb
   end
 
   def reveal
@@ -50,7 +82,6 @@ class Tile
     neighbors = deltas.map do |dx, dy|
       [position[0] + dx, position[1] + dy]
     end
-
     neighbors.select { |value| on_board?(value) }
   end
 
@@ -64,7 +95,16 @@ class Tile
 
   end
 
+  def print_tile
+    if @bomb == true
+      return "X"
+    else
+      return "_"
+    end
+  end
+
 end
 
 a = Tile.new([0,0])
-p a.neighbors
+b = Board.new
+p b.board
