@@ -27,6 +27,7 @@ def place_flag
 
 =end
 
+require 'debugger'
 
 class Board
   attr_accessor :board
@@ -71,7 +72,7 @@ class Board
   end
 
   def unrevealed_neighbors(position)
-    current_tile = board[position[0]][position[1]]
+    current_tile = @board[position[0]][position[1]]
     neighbors = current_tile.neighbors_locations
     neighbors.select { |x| board[x[0]][x[1]].revealed == false }
   end
@@ -126,14 +127,14 @@ class Tile
     if @revealed == false
       return "_"
 
+    elsif @revealed == true && @bomb == true
+      return "x"
+
     elsif @num_surrounding_bombs != nil && @revealed == true && @num_surrounding_bombs > 0
       return "#{num_surrounding_bombs}"
 
-    elsif @num_surrounding_bombs != nil && @revealed == true && @num_surrounding_bombs == 0
+    elsif @revealed == true && @num_surrounding_bombs == 0 && @bomb != true
       return "o"
-
-    elsif @revealed == true && @bomb == true
-      return "x"
     end
   end
 
@@ -147,11 +148,21 @@ class Game
     @my_board = Board.new
     @win = false
     @lose = false
+    self.set_surronding_bomb_count
+  end
+
+  def set_surronding_bomb_count
+    @my_board.board.each_with_index do |a, row|
+      a.each_with_index do |b, column|
+        bombs = @my_board.neighbor_bomb_count([row, column])
+        b.num_surrounding_bombs = bombs
+      end
+    end
   end
 
   def reveal_tile(position)
-    current_tile = @my_board[position[0]][position[1]]
-    surrounding_bombs_total = current_tile.neighbor_bomb_count(position)
+    current_tile = @my_board.board[position[0]][position[1]]
+    surrounding_bombs_total = @my_board.neighbor_bomb_count(position)
 
     if current_tile.bomb == true
       current_tile.revealed = true
@@ -163,8 +174,8 @@ class Game
 
     else
       current_tile.revealed = true
-      urn = @my_board.unrevealed_neighbors(@my_board[position[0]][position[1]])
-      urn.each { |x| @my_board.reveal_tile( x ) }
+      urn = @my_board.unrevealed_neighbors([position[0],position[1]])
+      urn.each { |x| self.reveal_tile( x ) }
     end
 
   end
@@ -176,11 +187,12 @@ class Game
 end
 
 a = Game.new
-a.my_board.board.each do |row|
-  row.each do |tile|
-    tile.revealed = true
-
-  end
-end
-a.my_board.board.reveal_tile([1,1])
+# a.my_board.board.each_with_index do |row, idx1|
+#   row.each_with_index do |tile, idx2|
+#     #debugger
+#     tile.revealed = true
+#     a.reveal_tile([idx1, idx2])
+#   end
+# end
+# a.my_board.board.reveal_tile([1,1])
 a.my_board.print_board
