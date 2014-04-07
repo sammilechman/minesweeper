@@ -18,15 +18,13 @@ def seed_bombs
 def process_guess
 
 
-User Class:
-def guess
-def place_flag
-
-
 Game Class:
 def play
 def save
 def load
+def guess
+def place_flag
+
 =end
 
 
@@ -72,6 +70,20 @@ class Board
     count
   end
 
+  def unrevealed_neighbors(position)
+    current_tile = board[position[0]][position[1]]
+    neighbors = current_tile.neighbors_locations
+    neighbors.select { |x| board[x[0]][x[1]].revealed == false }
+  end
+
+  def normalize_neighbors(arr)
+    objects_array = []
+    arr.each do |neighbor_pos|
+      objects_array << @board[neighbor_pos[0]][neighbor_pos[1]]
+    end
+    objects_array
+  end
+
   def print_board
     @board.each do |row|
       row.each do |tile|
@@ -84,17 +96,16 @@ class Board
 end
 
 class Tile
-  attr_reader :position, :bomb, :neighbors, :revealed
+  attr_reader :position, :bomb, :neighbors
+  attr_accessor :revealed, :flagged, :num_surrounding_bombs
 
-  def initialize(position, bomb = false, revealed = false)
+  def initialize(position, bomb = false, revealed = false, flagged = false)
     @position = position
     @bomb = bomb
     @neighbors = neighbors_locations
     @revealed = revealed
-  end
-
-  def reveal
-
+    @flagged = flagged
+    @num_surrounding_bombs = nil
   end
 
   def neighbors_locations
@@ -112,16 +123,64 @@ class Tile
   end
 
   def print_tile
-    if @bomb == true
-      return "x"
-    else
+    if @revealed == false
       return "_"
+
+    elsif @num_surrounding_bombs != nil && @revealed == true && @num_surrounding_bombs > 0
+      return "#{num_surrounding_bombs}"
+
+    elsif @num_surrounding_bombs != nil && @revealed == true && @num_surrounding_bombs == 0
+      return "o"
+
+    elsif @revealed == true && @bomb == true
+      return "x"
     end
   end
 
 end
 
-b = Board.new
+class Game
 
-b.print_board
-p b.neighbor_bomb_count([1,1])
+  attr_accessor :my_board
+
+  def initialize
+    @my_board = Board.new
+    @win = false
+    @lose = false
+  end
+
+  def reveal_tile(position)
+    current_tile = @my_board[position[0]][position[1]]
+    surrounding_bombs_total = current_tile.neighbor_bomb_count(position)
+
+    if current_tile.bomb == true
+      current_tile.revealed = true
+      @lose = true
+
+    elsif surrounding_bombs_total > 0
+      current_tile.revealed = true
+      current_tile.num_surrounding_bombs = surrounding_bombs_total
+
+    else
+      current_tile.revealed = true
+      urn = @my_board.unrevealed_neighbors(@my_board[position[0]][position[1]])
+      urn.each { |x| @my_board.reveal_tile( x ) }
+    end
+
+  end
+
+  def input_move
+
+  end
+
+end
+
+a = Game.new
+a.my_board.board.each do |row|
+  row.each do |tile|
+    tile.revealed = true
+
+  end
+end
+a.my_board.board.reveal_tile([1,1])
+a.my_board.print_board
