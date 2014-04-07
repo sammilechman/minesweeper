@@ -62,17 +62,35 @@ class Board
     list
   end
 
+  def neighbor_bomb_count(position)
+    count = 0
+    current_tile = board[position[0]][position[1]]
+    neighbors = current_tile.neighbors_locations
+    neighbors.each do |neighbor|
+      count += 1 if board[neighbor[0]][neighbor[1]].bomb == true
+    end
+    count
+  end
+
+  def print_board
+    @board.each do |row|
+      row.each do |tile|
+        print " #{tile.print_tile} "
+      end
+      puts
+    end
+  end
 
 end
 
 class Tile
-  attr_reader :position, :bomb, :neighbors, :adj_bombs
+  attr_reader :position, :bomb, :neighbors, :revealed
 
-  def initialize(position, bomb = false)
+  def initialize(position, bomb = false, revealed = false)
     @position = position
     @bomb = bomb
     @neighbors = neighbors_locations
-    @adj_bombs = neighbor_bomb_count
+    @revealed = revealed
   end
 
   def reveal
@@ -93,17 +111,9 @@ class Tile
     true
   end
 
-  def neighbor_bomb_count
-    count = 0
-    @neighbors.each do |neighbor|
-      count += 1 if neighbor.bomb == true
-    end
-    count
-  end
-
   def print_tile
     if @bomb == true
-      return "X"
+      return "x"
     else
       return "_"
     end
@@ -111,6 +121,7 @@ class Tile
 
 end
 
-a = Tile.new([1,1])
 b = Board.new
-p a.adj_bombs
+
+b.print_board
+p b.neighbor_bomb_count([1,1])
