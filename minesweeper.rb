@@ -156,7 +156,12 @@ class Game
     @win = false
     @lose = false
     self.set_surronding_bomb_count
-    self.input_move
+    self.greeting_sequence
+  end
+
+  def greeting_sequence
+    puts "\n\n\nWelcome to Minesweeper\n\n\n"
+
   end
 
   def set_surronding_bomb_count
@@ -186,16 +191,19 @@ class Game
       urn = @my_board.unrevealed_neighbors([position[0],position[1]])
       urn.each { |x| self.reveal_tile( x ) }
     end
+  end
 
+  def win_checker
+    count = 0
+    self.my_board.board.each do |row|
+      row.each do |tile|
+        count += 1 if tile.revealed
+      end
+    end
+    @won = true if count == 71
   end
 
   def input_move
-
-    if @won
-      win_sequence
-    elsif @lose
-      lose_sequence
-    end
     until @won || @lose
       self.my_board.print_board
       puts "Please enter your first move in following form:"
@@ -209,23 +217,26 @@ class Game
         #place flag at that location
         @my_board.board[(user_input[0].to_i)][user_input[1].to_i].flagged = true
       end
+      self.win_checker
       def win_sequence
-        puts "You win!"
+        puts "You win!\n\n"
+        self.my_board.print_board
+        puts "You win!\n\n"
       end
 
       def lose_sequence
-        puts "You suck"
+        puts "You suck.\n\n"
+        self.my_board.print_board
+        puts "You suck.\n\n"
       end
+    end
+    if @won
+      win_sequence
+    elsif @lose
+      lose_sequence
     end
   end
 
 end
 
 a = Game.new
-# a.my_board.board.each_with_index do |row, idx1|
-#   row.each_with_index do |tile, idx2|
-#     #debugger
-#     tile.revealed = true
-#     a.reveal_tile([idx1, idx2])
-#   end
-# end
