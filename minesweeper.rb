@@ -181,7 +181,16 @@ class Game
   end
 
   def input_move
-
+    puts "Please enter your first move in following form:"
+    puts "1,1 for [1,1]"
+    puts "For flags 1,1,f"
+    user_input = gets.chomp
+    user_input =  user_input.split(",")
+    if user_input.length == 2
+      # Reveal Tile @ location
+    elsif user_input.length == 3
+      #place flag at that location
+    end
   end
 
 end
@@ -194,5 +203,5 @@ a = Game.new
 #     a.reveal_tile([idx1, idx2])
 #   end
 # end
-# a.my_board.board.reveal_tile([1,1])
+a.reveal_tile([1,1])
 a.my_board.print_board
