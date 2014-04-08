@@ -266,6 +266,3 @@ def greeting_sequence
 end
 
 greeting_sequence
-
-a = YAML::load_file(File.open("savegames/almostthere.yml", "r"))
-a.input_move
