@@ -161,19 +161,7 @@ class Game
     @win = false
     @lose = false
     self.set_surronding_bomb_count
-    self.greeting_sequence
-  end
-
-  def greeting_sequence
-    puts "\n\n\nWelcome to Minesweeper\n\n\n\n"
-    puts "Would you like to load? Input L if so: "
-    input = gets.chomp.downcase
-    puts "\n\n\n"
-    if input == 'l'
-      #initiate load sequence
-    else
-      self.input_move
-    end
+    self.input_move
   end
 
   def set_surronding_bomb_count
@@ -215,6 +203,14 @@ class Game
     @won = true if count == 71
   end
 
+  def save_game
+    puts "Please name your save game: "
+    filename = gets.chomp.downcase
+    File.open("savegames/#{filename}.yml", 'w') do |f|
+      f.puts self.to_yaml
+    end
+  end
+
   def input_move
     until @won || @lose
       self.my_board.print_board
@@ -223,7 +219,9 @@ class Game
       puts "For flags 1,1,f"
       user_input = gets.chomp
       user_input =  user_input.split(",")
-      if user_input.length == 2
+      if user_input[0].downcase == 's'
+        self.save_game
+      elsif user_input.length == 2
         reveal_tile([user_input[0].to_i, user_input[1].to_i])
       elsif user_input.length == 3
         #place flag at that location
@@ -251,4 +249,23 @@ class Game
 
 end
 
-a = Game.new
+def greeting_sequence
+  puts "\n\n\nWelcome to Minesweeper\n\n\n\n"
+  puts "Would you like to load? Input L if so: "
+  input = gets.chomp.downcase
+  puts "\n\n\n"
+  if input == 'l'
+    puts "What is the filename?"
+    filename = gets.chomp.downcase
+    a = YAML::load_file(File.open("savegames/#{filename}.yml", "r"))
+    a.input_move
+  else
+    a = Game.new
+    a.input_move
+  end
+end
+
+greeting_sequence
+
+a = YAML::load_file(File.open("savegames/almostthere.yml", "r"))
+a.input_move
