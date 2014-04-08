@@ -86,7 +86,11 @@ class Board
   end
 
   def print_board
-    @board.each do |row|
+
+    puts "   0  1  2  3  4  5  6  7  8 "
+
+    @board.each_with_index do |row, idx|
+      print "#{idx} "
       row.each do |tile|
         print " #{tile.print_tile} "
       end
@@ -124,8 +128,11 @@ class Tile
   end
 
   def print_tile
-    if @revealed == false
+    if @revealed == false && @flagged == false
       return "_"
+
+    elsif @flagged == true
+      return "F"
 
     elsif @revealed == true && @bomb == true
       return "x"
@@ -149,6 +156,7 @@ class Game
     @win = false
     @lose = false
     self.set_surronding_bomb_count
+    self.input_move
   end
 
   def set_surronding_bomb_count
@@ -164,10 +172,11 @@ class Game
     current_tile = @my_board.board[position[0]][position[1]]
     surrounding_bombs_total = @my_board.neighbor_bomb_count(position)
 
-    if current_tile.bomb == true
+    if current_tile.bomb
       current_tile.revealed = true
       @lose = true
-
+    elsif current_tile.flagged
+      current_tile.revealed = false
     elsif surrounding_bombs_total > 0
       current_tile.revealed = true
       current_tile.num_surrounding_bombs = surrounding_bombs_total
@@ -181,15 +190,32 @@ class Game
   end
 
   def input_move
-    puts "Please enter your first move in following form:"
-    puts "1,1 for [1,1]"
-    puts "For flags 1,1,f"
-    user_input = gets.chomp
-    user_input =  user_input.split(",")
-    if user_input.length == 2
-      # Reveal Tile @ location
-    elsif user_input.length == 3
-      #place flag at that location
+
+    if @won
+      win_sequence
+    elsif @lose
+      lose_sequence
+    end
+    until @won || @lose
+      self.my_board.print_board
+      puts "Please enter your first move in following form:"
+      puts "3,1 for Row: 3, Column: 1"
+      puts "For flags 1,1,f"
+      user_input = gets.chomp
+      user_input =  user_input.split(",")
+      if user_input.length == 2
+        reveal_tile([user_input[0].to_i, user_input[1].to_i])
+      elsif user_input.length == 3
+        #place flag at that location
+        @my_board.board[(user_input[0].to_i)][user_input[1].to_i].flagged = true
+      end
+      def win_sequence
+        puts "You win!"
+      end
+
+      def lose_sequence
+        puts "You suck"
+      end
     end
   end
 
@@ -203,5 +229,3 @@ a = Game.new
 #     a.reveal_tile([idx1, idx2])
 #   end
 # end
-a.reveal_tile([1,1])
-a.my_board.print_board
