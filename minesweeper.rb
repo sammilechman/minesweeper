@@ -28,6 +28,7 @@ def place_flag
 =end
 
 require 'debugger'
+require 'yaml'
 
 class Board
   attr_accessor :board
@@ -87,6 +88,8 @@ class Board
 
   def print_board
 
+    puts
+
     puts "   0  1  2  3  4  5  6  7  8 "
 
     @board.each_with_index do |row, idx|
@@ -94,8 +97,10 @@ class Board
       row.each do |tile|
         print " #{tile.print_tile} "
       end
-      puts
+      puts "\n"
     end
+
+    puts "\n\n"
   end
 
 end
@@ -160,8 +165,15 @@ class Game
   end
 
   def greeting_sequence
-    puts "\n\n\nWelcome to Minesweeper\n\n\n"
-
+    puts "\n\n\nWelcome to Minesweeper\n\n\n\n"
+    puts "Would you like to load? Input L if so: "
+    input = gets.chomp.downcase
+    puts "\n\n\n"
+    if input == 'l'
+      #initiate load sequence
+    else
+      self.input_move
+    end
   end
 
   def set_surronding_bomb_count
